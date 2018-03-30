@@ -1,9 +1,5 @@
 package sse
 
-import (
-    "log"
-)
-
 type Channel struct {
     lastEventId,
     name string
@@ -27,8 +23,6 @@ func (c *Channel) SendMessage(message *Message) {
             c.send <- message
         }
     }
-
-    log.Printf("go-sse: message sent to channel '%s'.", c.name)
 }
 
 func (c *Channel) Close() {
@@ -36,8 +30,6 @@ func (c *Channel) Close() {
     for client, _ := range c.clients {
         c.removeClient(client)
     }
-
-    log.Printf("go-sse: channel '%s' closed.", c.name)
 }
 
 func (c *Channel) ClientCount() int {
@@ -50,12 +42,10 @@ func (c *Channel) LastEventId() string {
 
 func (c *Channel) addClient(client *Client) {
     c.clients[client] = true
-    log.Printf("go-sse: new client connected to channel '%s'.", c.name)
 }
 
 func (c *Channel) removeClient(client *Client) {
     c.clients[client] = false
     close(client.send)
     delete(c.clients, client)
-    log.Printf("go-sse: client disconnected from channel '%s'.", c.name)
 }

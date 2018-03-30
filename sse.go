@@ -13,6 +13,7 @@ type Server struct {
     removeClient chan *Client
     shutdown chan bool
     closeChannel chan string
+    Debug bool
 }
 
 // NewServer creates a new SSE server.
@@ -28,9 +29,8 @@ func NewServer(options *Options) *Server {
         make(chan *Client),
         make(chan bool),
         make(chan string),
+        false,
     }
-
-    log.Printf("go-sse: server started.")
 
     go s.dispatch()
 
@@ -58,7 +58,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
         h.Set("Cache-Control", "no-cache")
         h.Set("Connection", "keep-alive")
 
-        var channelName string 
+        var channelName string
 
         if s.options.ChannelNameFunc == nil {
             channelName = request.URL.Path
@@ -90,21 +90,29 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 // If channel is an empty string, it will broadcast the message to all channels.
 func (s *Server) SendMessage(channel string, message *Message) {
     if len(channel) == 0 {
-        log.Printf("go-sse: broadcasting message to all channels.")
+        if s.Debug {
+            log.Printf("go-sse: broadcasting message to all channels.")
+        }
 
         for _, ch := range s.channels {
             ch.SendMessage(message)
         }
     } else if ch, ok := s.channels[channel]; ok {
+        if s.Debug {
+            log.Printf("go-sse: message sent to channel '%s'.", ch.name)
+        }
         ch.SendMessage(message)
-    } else {
+    } else if s.Debug {
         log.Printf("go-sse: message not sent because channel '%s' has no clients.", channel)
     }
 }
 
 // Restart closes all channels and clients and allow new connections.
 func (s *Server) Restart() {
-    log.Printf("go-sse: restarting server.")
+    if s.Debug {
+        log.Printf("go-sse: restarting server.")
+    }
+    
     s.close()
 }
 
@@ -154,6 +162,10 @@ func (s *Server) close() {
 }
 
 func (s *Server) dispatch() {
+    if s.Debug {
+        log.Printf("go-sse: server started.")
+    }
+    
     for {
         select {
 
@@ -164,22 +176,36 @@ func (s *Server) dispatch() {
             if !exists {
                 ch = NewChannel(c.channel)
                 s.channels[ch.name] = ch
-                log.Printf("go-sse: channel '%s' created.", ch.name)
+                
+                if s.Debug {
+                    log.Printf("go-sse: channel '%s' created.", ch.name)
+                }
             }
 
             ch.addClient(c)
+            if s.Debug {
+                log.Printf("go-sse: new client connected to channel '%s'.", ch.name)
+            }
 
         // Client disconnected.
         case c := <- s.removeClient:
             if ch, exists := s.channels[c.channel]; exists {
                 ch.removeClient(c)
+                if s.Debug {
+                    log.Printf("go-sse: client disconnected from channel '%s'.", ch.name)
+                }
 
-                log.Printf("go-sse: checking if channel '%s' has clients.", ch.name)
+                if s.Debug {
+                    log.Printf("go-sse: checking if channel '%s' has clients.", ch.name)
+                }
 
                 if ch.ClientCount() == 0 {
                     delete(s.channels, ch.name)
                     ch.Close()
-                    log.Printf("go-sse: channel '%s' has no clients.", ch.name)
+                    
+                    if s.Debug {
+                        log.Printf("go-sse: channel '%s' has no clients.", ch.name)
+                    }
                 }
             }
 
@@ -188,7 +214,11 @@ func (s *Server) dispatch() {
             if ch, exists := s.channels[channel]; exists {
                 delete(s.channels, channel)
                 ch.Close()
-            } else {
+                
+                if s.Debug {
+                    log.Printf("go-sse: channel '%s' closed.", ch.name)
+                }
+            } else if s.Debug {
                 log.Printf("go-sse: requested to close channel '%s', but it doesn't exists.", channel)
             }
 
@@ -199,7 +229,10 @@ func (s *Server) dispatch() {
             close(s.removeClient)
             close(s.closeChannel)
             close(s.shutdown)
-            log.Printf("go-sse: server stoped.")
+            
+            if s.Debug {
+                log.Printf("go-sse: server stopped.")
+            }
             return
         }
     }
