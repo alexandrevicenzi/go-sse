@@ -24,6 +24,8 @@ func main() {
             return request.URL.Path
         },
     })
+    
+    s.Debug = true
 
     defer s.Shutdown()
 
