@@ -25,7 +25,7 @@ func main() {
         },
     })
     
-    s.Debug = true
+    s.Debug = func(info string){log.Println(info)}
 
     defer s.Shutdown()
 
