@@ -25,7 +25,11 @@ func main() {
         },
     })
     
-    s.Debug = func(info string){log.Println(info)}
+    go func(info chan string){
+        for notif := range info {
+            log.Println("go-sse: ", notif)
+        }
+    }(s.Notifications())
 
     defer s.Shutdown()
 
