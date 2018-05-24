@@ -77,6 +77,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
         }()
         
         response.WriteHeader(http.StatusOK)
+        flusher.Flush()
 
         for msg := range c.send {
             msg.retry = s.options.RetryInterval
