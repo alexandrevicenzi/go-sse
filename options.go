@@ -2,6 +2,7 @@ package sse
 
 import (
     "net/http"
+    "log"
 )
 
 type Options struct {
@@ -12,6 +13,8 @@ type Options struct {
     // ChannelNameFunc allow to create custom channel names.
     // Default channel name is the request path.
     ChannelNameFunc func (*http.Request) string
+    // All usage logs end up in Logger
+    Logger *log.Logger
 }
 
 func (opt *Options) HasHeaders() bool {

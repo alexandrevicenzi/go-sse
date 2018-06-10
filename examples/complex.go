@@ -5,6 +5,7 @@ import (
     "net/http"
     "strconv"
     "time"
+    "os"
 
     "github.com/alexandrevicenzi/go-sse"
 )
@@ -23,13 +24,11 @@ func main() {
         ChannelNameFunc: func (request *http.Request) string {
             return request.URL.Path
         },
+        // Print debug info
+        Logger: log.New(os.Stdout,
+          "go-sse: ",
+          log.Ldate|log.Ltime|log.Lshortfile),
     })
-    
-    go func(info chan string){
-        for notif := range info {
-            log.Println("go-sse: ", notif)
-        }
-    }(s.Notifications())
 
     defer s.Shutdown()
 
