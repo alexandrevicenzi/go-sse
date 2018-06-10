@@ -72,6 +72,9 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
             <-closeNotify
             s.removeClient <- c
         }()
+        
+        response.WriteHeader(http.StatusOK)
+        flusher.Flush()
 
         for msg := range c.send {
             msg.retry = s.options.RetryInterval
