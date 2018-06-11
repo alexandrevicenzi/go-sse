@@ -25,9 +25,7 @@ func main() {
 			return request.URL.Path
 		},
 		// Print debug info
-		Logger: log.New(os.Stdout,
-			"go-sse: ",
-			log.Ldate|log.Ltime|log.Lshortfile),
+		Logger: log.New(os.Stdout, "go-sse: ", log.Ldate|log.Ltime|log.Lshortfile),
 	})
 
 	defer s.Shutdown()

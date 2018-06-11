@@ -1,7 +1,11 @@
 language: go
 go:
   - 1.6
-  - tip
+  - 1.7
+  - 1.8
+  - 1.9
+  - 1.10
+  - master
 install: go get -t -v
 script: go test -v
 notifications:

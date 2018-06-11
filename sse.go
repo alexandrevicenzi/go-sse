@@ -2,7 +2,10 @@ package sse
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 )
 
 type Server struct {
@@ -17,7 +20,13 @@ type Server struct {
 // NewServer creates a new SSE server.
 func NewServer(options *Options) *Server {
 	if options == nil {
-		options = &Options{}
+		options = &Options{
+			Logger: log.New(os.Stdout, "go-sse: ", log.LstdFlags),
+		}
+	}
+
+	if options.Logger == nil {
+		options.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
 	}
 
 	s := &Server{
