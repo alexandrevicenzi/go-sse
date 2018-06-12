@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// Options holds server configurations.
 type Options struct {
 	// RetryInterval change EventSource default retry interval (milliseconds).
 	RetryInterval int
@@ -17,6 +18,6 @@ type Options struct {
 	Logger *log.Logger
 }
 
-func (opt *Options) HasHeaders() bool {
+func (opt *Options) hasHeaders() bool {
 	return opt.Headers != nil && len(opt.Headers) > 0
 }

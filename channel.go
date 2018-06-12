@@ -1,12 +1,13 @@
 package sse
 
+// Channel represents a server sent events channel.
 type Channel struct {
-	lastEventId,
+	lastEventID,
 	name string
 	clients map[*Client]bool
 }
 
-func NewChannel(name string) *Channel {
+func newChannel(name string) *Channel {
 	return &Channel{
 		"",
 		name,
@@ -16,7 +17,7 @@ func NewChannel(name string) *Channel {
 
 // SendMessage broadcast a message to all clients in a channel.
 func (c *Channel) SendMessage(message *Message) {
-	c.lastEventId = message.id
+	c.lastEventID = message.id
 
 	for c, open := range c.clients {
 		if open {
@@ -25,19 +26,22 @@ func (c *Channel) SendMessage(message *Message) {
 	}
 }
 
+// Close closes the channel and disconnect all clients.
 func (c *Channel) Close() {
 	// Kick all clients of this channel.
-	for client, _ := range c.clients {
+	for client := range c.clients {
 		c.removeClient(client)
 	}
 }
 
+// ClientCount returns the number of clients connected to this channel.
 func (c *Channel) ClientCount() int {
 	return len(c.clients)
 }
 
-func (c *Channel) LastEventId() string {
-	return c.lastEventId
+// LastEventID returns the ID of the last message sent.
+func (c *Channel) LastEventID() string {
+	return c.lastEventID
 }
 
 func (c *Channel) addClient(client *Client) {

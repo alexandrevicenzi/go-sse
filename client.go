@@ -1,14 +1,15 @@
 package sse
 
+// Client represents a web browser connection.
 type Client struct {
-	lastEventId,
+	lastEventID,
 	channel string
 	send chan *Message
 }
 
-func NewClient(lastEventId, channel string) *Client {
+func newClient(lastEventID, channel string) *Client {
 	return &Client{
-		lastEventId,
+		lastEventID,
 		channel,
 		make(chan *Message),
 	}
@@ -16,7 +17,7 @@ func NewClient(lastEventId, channel string) *Client {
 
 // SendMessage sends a message to client.
 func (c *Client) SendMessage(message *Message) {
-	c.lastEventId = message.id
+	c.lastEventID = message.id
 	c.send <- message
 }
 
@@ -25,6 +26,7 @@ func (c *Client) Channel() string {
 	return c.channel
 }
 
-func (c *Client) LastEventId() string {
-	return c.lastEventId
+// LastEventID returns the ID of the last message sent.
+func (c *Client) LastEventID() string {
+	return c.lastEventID
 }

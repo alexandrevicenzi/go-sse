@@ -8,6 +8,7 @@ import (
 	"os"
 )
 
+// Server represents a server sent events server.
 type Server struct {
 	options      *Options
 	channels     map[string]*Channel
@@ -53,7 +54,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 	h := response.Header()
 
-	if s.options.HasHeaders() {
+	if s.options.hasHeaders() {
 		for k, v := range s.options.Headers {
 			h.Set(k, v)
 		}
@@ -72,8 +73,8 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 			channelName = s.options.ChannelNameFunc(request)
 		}
 
-		lastEventId := request.Header.Get("Last-Event-ID")
-		c := NewClient(lastEventId, channelName)
+		lastEventID := request.Header.Get("Last-Event-ID")
+		c := newClient(lastEventID, channelName)
 		s.addClient <- c
 		closeNotify := response.(http.CloseNotifier).CloseNotify()
 
@@ -124,6 +125,7 @@ func (s *Server) Shutdown() {
 	s.shutdown <- true
 }
 
+// ClientCount returns the number of clients connected to this server.
 func (s *Server) ClientCount() int {
 	i := 0
 
@@ -134,32 +136,36 @@ func (s *Server) ClientCount() int {
 	return i
 }
 
+// HasChannel returns true if the channel associated with name exists.
 func (s *Server) HasChannel(name string) bool {
 	_, ok := s.channels[name]
 	return ok
 }
 
+// GetChannel returns the channel associated with name or nil if not found.
 func (s *Server) GetChannel(name string) (*Channel, bool) {
 	ch, ok := s.channels[name]
 	return ch, ok
 }
 
+// Channels returns a list of all channels to the server.
 func (s *Server) Channels() []string {
 	channels := []string{}
 
-	for name, _ := range s.channels {
+	for name := range s.channels {
 		channels = append(channels, name)
 	}
 
 	return channels
 }
 
+// CloseChannel closes a channel.
 func (s *Server) CloseChannel(name string) {
 	s.closeChannel <- name
 }
 
 func (s *Server) close() {
-	for name, _ := range s.channels {
+	for name := range s.channels {
 		s.closeChannel <- name
 	}
 }
@@ -175,7 +181,7 @@ func (s *Server) dispatch() {
 			ch, exists := s.channels[c.channel]
 
 			if !exists {
-				ch = NewChannel(c.channel)
+				ch = newChannel(c.channel)
 				s.channels[ch.name] = ch
 
 				s.options.Logger.Printf("channel '%s' created.", ch.name)

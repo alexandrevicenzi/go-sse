@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Message represents a event source message.
 type Message struct {
 	id,
 	data,

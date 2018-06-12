@@ -5,7 +5,7 @@ import "testing"
 func TestHasHeadersEmpty(t *testing.T) {
 	opt := Options{}
 
-	if opt.HasHeaders() == true {
+	if opt.hasHeaders() == true {
 		t.Fatal("There's headers.")
 	}
 }
@@ -21,7 +21,7 @@ func TestHasHeadersNotEmpty(t *testing.T) {
 		},
 	}
 
-	if opt.HasHeaders() == false {
+	if opt.hasHeaders() == false {
 		t.Fatal("There's no headers.")
 	}
 }
