@@ -30,3 +30,11 @@ func TestMessage(t *testing.T) {
 		t.Fatal("Messagem not empty.")
 	}
 }
+
+func TestMultilineDataMessage(t *testing.T) {
+	msg := Message{data: "test\ntest"}
+
+	if msg.String() != "data: test\ndata: test\n\n" {
+		t.Fail()
+	}
+}
