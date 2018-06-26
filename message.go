@@ -3,6 +3,7 @@ package sse
 import (
 	"bytes"
 	"fmt"
+	"strings"
 )
 
 // Message represents a event source message.
@@ -42,7 +43,7 @@ func (m *Message) String() string {
 	}
 
 	if len(m.data) > 0 {
-		buffer.WriteString(fmt.Sprintf("data: %s\n", m.data))
+		buffer.WriteString(fmt.Sprintf("data: %s\n", strings.Replace(m.data, "\n", "\ndata: ", -1)))
 	}
 
 	buffer.WriteString("\n")
