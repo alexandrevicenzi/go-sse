@@ -1,8 +1,10 @@
 sse:
-  image: golang:1.6
+  image: golang:1.11
   working_dir: /go/src/github.com/alexandrevicenzi/go-sse
   command: bash -c "cd examples && go run simple.go"
   ports:
-   - "3000:3000"
+    - "3000:3000"
+  environment:
+    - GO111MODULE=on
   volumes:
-   - .:/go/src/github.com/alexandrevicenzi/go-sse
+    - .:/go/src/github.com/alexandrevicenzi/go-sse

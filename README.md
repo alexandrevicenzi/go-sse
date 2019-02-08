@@ -1,4 +1,8 @@
-# go-sse [![Go Report Card](https://goreportcard.com/badge/github.com/alexandrevicenzi/go-sse)](https://goreportcard.com/report/github.com/alexandrevicenzi/go-sse) [![Build Status](https://travis-ci.org/alexandrevicenzi/go-sse.svg?branch=master)](https://travis-ci.org/alexandrevicenzi/go-sse) [![GoDoc](https://godoc.org/github.com/alexandrevicenzi/go-sse?status.svg)](http://godoc.org/github.com/alexandrevicenzi/go-sse)
+# go-sse
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/alexandrevicenzi/go-sse)](https://goreportcard.com/report/github.com/alexandrevicenzi/go-sse)
+[![Build Status](https://travis-ci.org/alexandrevicenzi/go-sse.svg?branch=master)](https://travis-ci.org/alexandrevicenzi/go-sse)
+[![GoDoc](https://godoc.org/github.com/alexandrevicenzi/go-sse?status.svg)](http://godoc.org/github.com/alexandrevicenzi/go-sse)
 
 Server-Sent Events for Go
 
@@ -8,7 +12,8 @@ Server-Sent Events for Go
 
 It's [supported](http://caniuse.com/#feat=eventsource) by all major browsers and for IE/Edge you can use a [polyfill](https://github.com/Yaffle/EventSource).
 
-`go-sse` is a small library to create a Server-Sent Events server in Go.
+`go-sse` is a small library to create a Server-Sent Events server in Go and works with Go 1.6+.
+
 
 ## Features
 
