@@ -6,10 +6,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 )
 
 // Server represents a server sent events server.
 type Server struct {
+	mu           sync.RWMutex
 	options      *Options
 	channels     map[string]*Channel
 	addClient    chan *Client
@@ -31,6 +33,7 @@ func NewServer(options *Options) *Server {
 	}
 
 	s := &Server{
+		sync.RWMutex{},
 		options,
 		make(map[string]*Channel),
 		make(chan *Client),
@@ -97,26 +100,29 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 }
 
 // SendMessage broadcast a message to all clients in a channel.
-// If channel is an empty string, it will broadcast the message to all channels.
-func (s *Server) SendMessage(channel string, message *Message) {
-	if len(channel) == 0 {
+// If channelName is an empty string, it will broadcast the message to all channels.
+func (s *Server) SendMessage(channelName string, message *Message) {
+	if len(channelName) == 0 {
 		s.options.Logger.Print("broadcasting message to all channels.")
+
+		s.mu.RLock()
 
 		for _, ch := range s.channels {
 			ch.SendMessage(message)
 		}
-	} else if _, ok := s.channels[channel]; ok {
-		s.options.Logger.Printf("message sent to channel '%s'.", channel)
-		s.channels[channel].SendMessage(message)
+
+		s.mu.RUnlock()
+	} else if ch, ok := s.getChannel(channelName); ok {
+		ch.SendMessage(message)
+		s.options.Logger.Printf("message sent to channel '%s'.", channelName)
 	} else {
-		s.options.Logger.Printf("message not sent because channel '%s' has no clients.", channel)
+		s.options.Logger.Printf("message not sent because channel '%s' has no clients.", channelName)
 	}
 }
 
 // Restart closes all channels and clients and allow new connections.
 func (s *Server) Restart() {
 	s.options.Logger.Print("restarting server.")
-
 	s.close()
 }
 
@@ -129,32 +135,39 @@ func (s *Server) Shutdown() {
 func (s *Server) ClientCount() int {
 	i := 0
 
+	s.mu.RLock()
+
 	for _, channel := range s.channels {
 		i += channel.ClientCount()
 	}
+
+	s.mu.RUnlock()
 
 	return i
 }
 
 // HasChannel returns true if the channel associated with name exists.
 func (s *Server) HasChannel(name string) bool {
-	_, ok := s.channels[name]
+	_, ok := s.getChannel(name)
 	return ok
 }
 
 // GetChannel returns the channel associated with name or nil if not found.
 func (s *Server) GetChannel(name string) (*Channel, bool) {
-	ch, ok := s.channels[name]
-	return ch, ok
+	return s.getChannel(name)
 }
 
 // Channels returns a list of all channels to the server.
 func (s *Server) Channels() []string {
 	channels := []string{}
 
+	s.mu.RLock()
+
 	for name := range s.channels {
 		channels = append(channels, name)
 	}
+
+	s.mu.RUnlock()
 
 	return channels
 }
@@ -164,9 +177,38 @@ func (s *Server) CloseChannel(name string) {
 	s.closeChannel <- name
 }
 
+func (s *Server) addChannel(name string) *Channel {
+	ch := newChannel(name)
+
+	s.mu.Lock()
+	s.channels[ch.name] = ch
+	s.mu.Unlock()
+
+	s.options.Logger.Printf("channel '%s' created.", ch.name)
+
+	return ch
+}
+
+func (s *Server) removeChannel(ch *Channel) {
+	s.mu.Lock()
+	delete(s.channels, ch.name)
+	s.mu.Unlock()
+
+	ch.Close()
+
+	s.options.Logger.Printf("channel '%s' closed.", ch.name)
+}
+
+func (s *Server) getChannel(name string) (*Channel, bool) {
+	s.mu.RLock()
+	ch, ok := s.channels[name]
+	s.mu.RUnlock()
+	return ch, ok
+}
+
 func (s *Server) close() {
-	for name := range s.channels {
-		s.closeChannel <- name
+	for _, ch := range s.channels {
+		s.removeChannel(ch)
 	}
 }
 
@@ -178,13 +220,10 @@ func (s *Server) dispatch() {
 
 		// New client connected.
 		case c := <-s.addClient:
-			ch, exists := s.channels[c.channel]
+			ch, exists := s.getChannel(c.channel)
 
 			if !exists {
-				ch = newChannel(c.channel)
-				s.channels[ch.name] = ch
-
-				s.options.Logger.Printf("channel '%s' created.", ch.name)
+				ch = s.addChannel(c.channel)
 			}
 
 			ch.addClient(c)
@@ -192,27 +231,22 @@ func (s *Server) dispatch() {
 
 		// Client disconnected.
 		case c := <-s.removeClient:
-			if ch, exists := s.channels[c.channel]; exists {
+			if ch, exists := s.getChannel(c.channel); exists {
 				ch.removeClient(c)
 				s.options.Logger.Printf("client disconnected from channel '%s'.", ch.name)
 
-				s.options.Logger.Printf("checking if channel '%s' has clients.", ch.name)
 				if ch.ClientCount() == 0 {
-					delete(s.channels, ch.name)
-					ch.Close()
-
 					s.options.Logger.Printf("channel '%s' has no clients.", ch.name)
+					s.removeChannel(ch)
 				}
 			}
 
 		// Close channel and all clients in it.
 		case channel := <-s.closeChannel:
-			if ch, exists := s.channels[channel]; exists {
-				delete(s.channels, channel)
-				ch.Close()
-				s.options.Logger.Printf("channel '%s' closed.", ch.name)
+			if ch, exists := s.getChannel(channel); exists {
+				s.removeChannel(ch)
 			} else {
-				s.options.Logger.Printf("requested to close channel '%s', but it doesn't exists.", channel)
+				s.options.Logger.Printf("requested to close nonexistent channel '%s'.", channel)
 			}
 
 		// Event Source shutdown.
