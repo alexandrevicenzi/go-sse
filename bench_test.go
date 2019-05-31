@@ -43,17 +43,19 @@ func BenchmarkServeHTTP(b *testing.B) {
 	defer srv.Shutdown()
 
 	req, _ := http.NewRequest("GET", "/channel-name", nil)
-	res := &mockResponseWriter{
-		make(chan bool),
-	}
 
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
+		res := &mockResponseWriter{
+			make(chan bool),
+		}
+
 		go func() {
 			res.Close()
 		}()
+
 		srv.ServeHTTP(res, req)
 	}
 }
