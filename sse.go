@@ -11,13 +11,13 @@ import (
 
 // Server represents a server sent events server.
 type Server struct {
-	mu           sync.RWMutex
-	options      *Options
-	channels     map[string]*Channel
-	addClient    chan *Client
-	removeClient chan *Client
-	shutdown     chan bool
-	closeChannel chan string
+	mu                  sync.RWMutex
+	options             *Options
+	channels            map[string]*Channel
+	addClient           chan *Client
+	removeClient        chan *Client
+	shutdown            chan bool
+	closeChannel        chan string
 }
 
 // NewServer creates a new SSE server.
@@ -228,6 +228,9 @@ func (s *Server) dispatch() {
 
 			ch.addClient(c)
 			s.options.Logger.Printf("new client connected to channel '%s'.", ch.name)
+			if s.options.ConnectionCallBackFunc != nil {
+				s.options.ConnectionCallBackFunc(ch.name)
+			}
 
 		// Client disconnected.
 		case c := <-s.removeClient:

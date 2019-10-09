@@ -15,6 +15,30 @@ func TestNewServerNilOptions(t *testing.T) {
 	}
 }
 
+func TestNewServerWConnFunc(t *testing.T) {
+	test := ""
+	srv := NewServer(&Options{
+		ConnectionCallBackFunc: func(c string) {
+			test = c
+		},
+	})
+	defer srv.Shutdown()
+
+	if srv.options.ConnectionCallBackFunc != nil {
+		srv.options.ConnectionCallBackFunc("test")
+		if test != "test" {
+			t.Fail()
+		}
+	} else {
+		t.Fail()
+	}
+
+	if srv == nil || srv.options == nil || srv.options.Logger == nil {
+		t.Fail()
+	}
+
+}
+
 func TestNewServerNilLogger(t *testing.T) {
 	srv := NewServer(&Options{
 		Logger: nil,
