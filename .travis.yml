@@ -8,8 +8,6 @@ go:
   - "1.12"
   - master
 install: go get -t -v
-script: 
-  go clean -testcache
-  go test -v
+script: go test -v
 notifications:
     email: false
