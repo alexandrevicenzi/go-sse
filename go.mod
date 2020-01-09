@@ -1,1 +1,1 @@
-module github.com/alexandrevicenzi/go-sse
+module github.com/kabaluyot/go-sse
