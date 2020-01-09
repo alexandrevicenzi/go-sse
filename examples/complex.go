@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/alexandrevicenzi/go-sse"
+	"github.com/kabaluyot/go-sse"
 )
 
 func main() {
