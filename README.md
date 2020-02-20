@@ -12,8 +12,7 @@ Server-Sent Events for Go
 
 It's [supported](http://caniuse.com/#feat=eventsource) by all major browsers and for IE/Edge you can use a [polyfill](https://github.com/Yaffle/EventSource).
 
-`go-sse` is a small library to create a Server-Sent Events server in Go and works with Go 1.6+.
-
+`go-sse` is a small library to create a Server-Sent Events server in Go and works with Go 1.9+.
 
 ## Features
 
@@ -22,10 +21,15 @@ It's [supported](http://caniuse.com/#feat=eventsource) by all major browsers and
 - Custom headers (useful for CORS)
 - `Last-Event-ID` support (resend lost messages)
 - [Follow SSE specification](https://html.spec.whatwg.org/multipage/comms.html#server-sent-events)
+- Compatible with multiple Go frameworks
 
-## Getting Started
+## Instalation
 
-Simple Go example that handle 2 channels and send messages to all clients connected in each channel.
+`go get github.com/alexandrevicenzi/go-sse`
+
+## Example
+
+Server side:
 
 ```go
 package main
@@ -40,45 +44,37 @@ import (
 )
 
 func main() {
-    // Create the server.
+    // Create SSE server
     s := sse.NewServer(nil)
     defer s.Shutdown()
 
-    // Register with /events endpoint.
+    // Configure the route
     http.Handle("/events/", s)
 
-    // Dispatch messages to channel-1.
-    go func () {
+    // Send messages every 5 seconds
+    go func() {
         for {
-            s.SendMessage("/events/channel-1", sse.SimpleMessage(time.Now().String()))
+            s.SendMessage("/events/my-channel", sse.SimpleMessage(time.Now().Format("2006/02/01/ 15:04:05")))
             time.Sleep(5 * time.Second)
         }
     }()
 
-    // Dispatch messages to channel-2
-    go func () {
-        i := 0
-        for {
-            i++
-            s.SendMessage("/events/channel-2", sse.SimpleMessage(strconv.Itoa(i)))
-            time.Sleep(5 * time.Second)
-        }
-    }()
-
+    log.Println("Listening at :3000")
     http.ListenAndServe(":3000", nil)
 }
 ```
 
-Connecting to our server from JavaScript:
+Client side (JavaScript):
 
 ```js
-e1 = new EventSource('/events/channel-1');
-e1.onmessage = function(event) {
-    // do something...
-};
-
-e2 = new EventSource('/events/channel-2');
-e2.onmessage = function(event) {
-    // do something...
+e = new EventSource('/events/my-channel');
+e.onmessage = function(event) {
+    console.log(event.data);
 };
 ```
+
+More examples available [here](https://github.com/alexandrevicenzi/go-sse/tree/master/_examples).
+
+## License
+
+MIT
