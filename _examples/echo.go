@@ -1,26 +1,26 @@
 package main
 
 import (
-	"log"
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/alexandrevicenzi/go-sse"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	r := chi.NewRouter()
-
-	r.Use(middleware.DefaultCompress)
-
 	s := sse.NewServer(nil)
 	defer s.Shutdown()
 
-	r.Handle("/", http.FileServer(http.Dir("./static")))
-	r.Mount("/events/", s)
+	e := echo.New()
+	e.File("/", "./static/index.html")
+
+	e.Any("/events/:channel", func(c echo.Context) error {
+		req := c.Request()
+		res := c.Response()
+		s.ServeHTTP(res, req)
+		return nil
+	})
 
 	go func() {
 		for {
@@ -38,6 +38,5 @@ func main() {
 		}
 	}()
 
-	log.Println("Listening at :3000")
-	http.ListenAndServe(":3000", r)
+	e.Logger.Fatal(e.Start(":3000"))
 }

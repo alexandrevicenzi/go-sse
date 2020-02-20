@@ -18,7 +18,7 @@ func main() {
 
 	go func() {
 		for {
-			s.SendMessage("/events/channel-1", sse.SimpleMessage(time.Now().String()))
+			s.SendMessage("/events/channel-1", sse.SimpleMessage(time.Now().Format("2006/02/01/ 15:04:05")))
 			time.Sleep(5 * time.Second)
 		}
 	}()
