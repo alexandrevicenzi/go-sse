@@ -80,7 +80,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 		lastEventID := request.Header.Get("Last-Event-ID")
 		c := newClient(lastEventID, channelName)
 		s.addClient <- c
-		closeNotify := response.(http.CloseNotifier).CloseNotify()
+		closeNotify := request.Context().Done()
 
 		go func() {
 			<-closeNotify

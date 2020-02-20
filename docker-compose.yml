@@ -1,7 +1,7 @@
 sse:
   image: golang:1.11
   working_dir: /go/src/github.com/alexandrevicenzi/go-sse
-  command: bash -c "cd examples && go run simple.go"
+  command: bash -c "cd _examples && go run simple.go"
   ports:
     - "3000:3000"
   environment:
