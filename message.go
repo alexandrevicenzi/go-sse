@@ -14,10 +14,12 @@ type Message struct {
 	retry int
 }
 
+// SimpleMessage creates a simple event source message.
 func SimpleMessage(data string) *Message {
 	return NewMessage("", data, "")
 }
 
+// NewMessage creates an event source message.
 func NewMessage(id, data, event string) *Message {
 	return &Message{
 		id,

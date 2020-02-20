@@ -21,7 +21,7 @@ func TestSendMessage(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	lastId := make(chan string, 1)
+	lastID := make(chan string, 1)
 	msgCount := make(chan int, 1)
 
 	c := newClient("", "client")
@@ -35,7 +35,7 @@ func TestSendMessage(t *testing.T) {
 			id = msg.id
 		}
 
-		lastId <- id
+		lastID <- id
 		msgCount <- i
 	}()
 
@@ -57,7 +57,7 @@ func TestSendMessage(t *testing.T) {
 		t.Fatal("Wrong message count.")
 	}
 
-	if ch.LastEventID() != <-lastId {
+	if ch.LastEventID() != <-lastID {
 		t.Fatal("Wrong Last ID.")
 	}
 }

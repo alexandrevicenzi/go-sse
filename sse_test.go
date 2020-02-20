@@ -67,7 +67,7 @@ func TestServer(t *testing.T) {
 				// Wait for messages in the channel
 				for msg := range c.send {
 					m.Lock()
-					messageCount += 1
+					messageCount++
 					m.Unlock()
 					fmt.Printf("Channel: %s - Client: %s - Message: %s\n", name, id, msg.data)
 					wg.Done()
