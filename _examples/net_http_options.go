@@ -26,6 +26,12 @@ func main() {
 		},
 		// Print debug info
 		Logger: log.New(os.Stdout, "go-sse: ", log.Ldate|log.Ltime|log.Lshortfile),
+		// Do some action after connect
+		AfterAddClientFunc: func(s *sse.Server, channelName string) {
+			// Maybe send all about new clients
+			// Or send past message to new clinet
+			s.SendMessage(channelName, sse.SimpleMessage("past message"))
+		},
 	})
 
 	defer s.Shutdown()

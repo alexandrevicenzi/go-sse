@@ -230,6 +230,10 @@ func (s *Server) dispatch() {
 			ch.addClient(c)
 			s.options.Logger.Printf("new client connected to channel '%s'.", ch.name)
 
+			if s.options.AfterAddClientFunc != nil {
+				s.options.AfterAddClientFunc(s, ch.name)
+			}
+
 		// Client disconnected.
 		case c := <-s.removeClient:
 			if ch, exists := s.getChannel(c.channel); exists {

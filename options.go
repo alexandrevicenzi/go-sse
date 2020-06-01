@@ -16,6 +16,8 @@ type Options struct {
 	ChannelNameFunc func(*http.Request) string
 	// All usage logs end up in Logger
 	Logger *log.Logger
+	// After add clinet function
+	AfterAddClientFunc func(s *Server, channelName string)
 }
 
 func (opt *Options) hasHeaders() bool {
