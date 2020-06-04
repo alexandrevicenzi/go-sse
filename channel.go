@@ -36,6 +36,17 @@ func (c *Channel) SendMessage(message *Message) {
 	c.mu.RUnlock()
 }
 
+// SendMessage broadcast a message to one client
+func (c *Channel) SendMessageToClient(message *Message, client *Client) {
+	c.mu.RLock()
+
+	if c.clients[client] {
+		client.send <- message
+	}
+
+	c.mu.RUnlock()
+}
+
 // Close closes the channel and disconnect all clients.
 func (c *Channel) Close() {
 	// Kick all clients of this channel.

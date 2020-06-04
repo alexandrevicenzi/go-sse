@@ -231,7 +231,7 @@ func (s *Server) dispatch() {
 			s.options.Logger.Printf("new client connected to channel '%s'.", ch.name)
 
 			if s.options.AfterAddClientFunc != nil {
-				s.options.AfterAddClientFunc(s, ch.name)
+				s.options.AfterAddClientFunc(s, ch.name, c)
 			}
 
 		// Client disconnected.
