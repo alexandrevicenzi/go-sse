@@ -1,3 +1,3 @@
-module github.com/alexandrevicenzi/go-sse
+module github.com/wdscxsj/go-sse
 
 go 1.11
