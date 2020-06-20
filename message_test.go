@@ -38,3 +38,11 @@ func TestMultilineDataMessage(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSpecialCharacterMessage(t *testing.T) {
+	msg := Message{data: "%x%o"}
+
+	if msg.String() != "data: %x%o\n\n" {
+		t.Fatal("Message does not match.")
+	}
+}

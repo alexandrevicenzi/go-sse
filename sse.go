@@ -1,7 +1,6 @@
 package sse
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -92,7 +91,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 		for msg := range c.send {
 			msg.retry = s.options.RetryInterval
-			fmt.Fprintf(response, msg.String())
+			response.Write(msg.Bytes())
 			flusher.Flush()
 		}
 	} else if request.Method != "OPTIONS" {
