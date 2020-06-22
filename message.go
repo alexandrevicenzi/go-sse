@@ -29,7 +29,7 @@ func NewMessage(id, data, event string) *Message {
 	}
 }
 
-func (m *Message) String() string {
+func (m *Message) Buffer() *bytes.Buffer {
 	var buffer bytes.Buffer
 
 	if len(m.id) > 0 {
@@ -50,5 +50,13 @@ func (m *Message) String() string {
 
 	buffer.WriteString("\n")
 
-	return buffer.String()
+	return &buffer
+}
+
+func (m *Message) String() string {
+	return m.Buffer().String()
+}
+
+func (m *Message) Bytes() []byte {
+	return m.Buffer().Bytes()
 }
