@@ -29,6 +29,7 @@ func NewMessage(id, data, event string) *Message {
 	}
 }
 
+// Buffer formats the message.
 func (m *Message) Buffer() *bytes.Buffer {
 	var buffer bytes.Buffer
 
@@ -53,10 +54,12 @@ func (m *Message) Buffer() *bytes.Buffer {
 	return &buffer
 }
 
+// String returns the formated message as a string.
 func (m *Message) String() string {
 	return m.Buffer().String()
 }
 
+// Bytes returns the formated message as a byte array.
 func (m *Message) Bytes() []byte {
 	return m.Buffer().Bytes()
 }
