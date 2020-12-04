@@ -1,8 +1,12 @@
 package sse
 
 import (
+	"context"
 	"fmt"
+	"go.uber.org/goleak"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"sync"
 	"testing"
@@ -86,4 +90,40 @@ func TestServer(t *testing.T) {
 	if messageCount != channelCount*clientCount {
 		t.Errorf("Expected %d messages but got %d", channelCount*clientCount, messageCount)
 	}
+}
+
+func TestShutdown(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	srv := NewServer(nil)
+
+	http.Handle("/events/", srv)
+
+	httpServer := &http.Server{Addr: ":3000", Handler: nil}
+
+	go func() { _ = httpServer.ListenAndServe() }()
+
+	stop := make(chan struct{})
+
+	go func() {
+		r, err := http.Get("http://localhost:3000/events/chan")
+		if err != nil {
+			log.Fatalln(err)
+			return
+		}
+		// Stop while client is reading the response
+		stop <- struct{}{}
+		_, _ = ioutil.ReadAll(r.Body)
+	}()
+
+	<-stop
+
+	srv.Shutdown()
+
+	ctx, done := context.WithTimeout(context.Background(), 600*time.Millisecond)
+	err := httpServer.Shutdown(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	done()
 }

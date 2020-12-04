@@ -70,4 +70,5 @@ func (c *Channel) removeClient(client *Client) {
 	delete(c.clients, client)
 	c.mu.Unlock()
 	close(client.send)
+	client.removed <- struct{}{}
 }

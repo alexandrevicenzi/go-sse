@@ -83,7 +83,10 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 		go func() {
 			<-closeNotify
-			s.removeClient <- c
+			select {
+			case s.removeClient <- c:
+			case <-c.removed:
+			}
 		}()
 
 		response.WriteHeader(http.StatusOK)
@@ -253,7 +256,6 @@ func (s *Server) dispatch() {
 		case <-s.shutdown:
 			s.close()
 			close(s.addClient)
-			close(s.removeClient)
 			close(s.closeChannel)
 			close(s.shutdown)
 

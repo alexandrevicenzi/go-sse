@@ -4,7 +4,8 @@ package sse
 type Client struct {
 	lastEventID,
 	channel string
-	send chan *Message
+	send    chan *Message
+	removed chan struct{}
 }
 
 func newClient(lastEventID, channel string) *Client {
@@ -12,6 +13,7 @@ func newClient(lastEventID, channel string) *Client {
 		lastEventID,
 		channel,
 		make(chan *Message),
+		make(chan struct{}, 1),
 	}
 }
 
