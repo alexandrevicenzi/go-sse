@@ -40,7 +40,7 @@ func TestServer(t *testing.T) {
 
 	defer srv.Shutdown()
 
-	// Create N channes
+	// Create N channels
 	for n := 0; n < channelCount; n++ {
 		name := fmt.Sprintf("CH-%d", n+1)
 		srv.addChannel(name)
@@ -50,7 +50,7 @@ func TestServer(t *testing.T) {
 	wg := sync.WaitGroup{}
 	m := sync.Mutex{}
 
-	// Create N clients in all channes
+	// Create N clients in all channels
 	for n := 0; n < clientCount; n++ {
 		for name, ch := range srv.channels {
 			wg.Add(1)
@@ -63,6 +63,7 @@ func TestServer(t *testing.T) {
 			id := fmt.Sprintf("C-%d", n+1)
 			fmt.Printf("Client %s registed to channel %s\n", id, name)
 
+			name := name
 			go func(id string) {
 				// Wait for messages in the channel
 				for msg := range c.send {
