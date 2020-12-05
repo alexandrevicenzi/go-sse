@@ -10,6 +10,7 @@ import (
 	"os"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestNewServerNilOptions(t *testing.T) {
@@ -44,7 +45,7 @@ func TestServer(t *testing.T) {
 
 	defer srv.Shutdown()
 
-	// Create N channes
+	// Create N channels
 	for n := 0; n < channelCount; n++ {
 		name := fmt.Sprintf("CH-%d", n+1)
 		srv.addChannel(name)
@@ -54,7 +55,7 @@ func TestServer(t *testing.T) {
 	wg := sync.WaitGroup{}
 	m := sync.Mutex{}
 
-	// Create N clients in all channes
+	// Create N clients in all channels
 	for n := 0; n < clientCount; n++ {
 		for name, ch := range srv.channels {
 			wg.Add(1)
