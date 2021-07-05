@@ -90,8 +90,9 @@ func TestServer(t *testing.T) {
 }
 
 func TestMultipleTopics(t *testing.T) {
-	// usage pattern we have a client which subsribed to multiple channels
-	// in one connection
+	// The usage pattern: Imagine  we have a client which subsribed to multiple topics
+	// inside a connection. It track changes of specific items state by their ID
+	// for example.
 	sendersWg := sync.WaitGroup{}
 	workerWg := sync.WaitGroup{}
 	m := sync.Mutex{}

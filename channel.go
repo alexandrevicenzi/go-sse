@@ -23,7 +23,9 @@ func newChannel(name string) *Channel {
 
 // SendMessage broadcast a message to all clients in a channel.
 func (c *Channel) SendMessage(message *Message) {
+	c.mu.Lock()
 	c.lastEventID = message.id
+	c.mu.Unlock()
 
 	c.mu.RLock()
 
