@@ -1,3 +1,3 @@
-module github.com/alexandrevicenzi/go-sse
+module github.com/Haraj-backend/go-sse
 
-go 1.11
+go 1.15
