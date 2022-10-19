@@ -1,0 +1,26 @@
+name: Code Integration Flow
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+    branches:
+      - master
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2.1.3
+        with:
+          go-version: ${{ env.DEFAULT_GO_VERSION }}
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Run test
+        run: go test ./...
