@@ -76,14 +76,24 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 			channelName = s.options.ChannelNameFunc(request)
 		}
 
+		select {
+		case <-s.shutdown:
+			http.Error(response, "SSE server is in termination state.", http.StatusServiceUnavailable)
+			return
+		default:
+		}
+
 		lastEventID := request.Header.Get("Last-Event-ID")
 		c := newClient(lastEventID, channelName)
 		s.addClient <- c
 		closeNotify := request.Context().Done()
 
 		go func() {
-			<-closeNotify
-			s.removeClient <- c
+			select {
+			case <-s.shutdown:
+			case <-closeNotify:
+				s.removeClient <- c
+			}
 		}()
 
 		response.WriteHeader(http.StatusOK)
@@ -128,7 +138,7 @@ func (s *Server) Restart() {
 
 // Shutdown performs a graceful server shutdown.
 func (s *Server) Shutdown() {
-	s.shutdown <- true
+	close(s.shutdown)
 }
 
 // ClientCount returns the number of clients connected to this server.
@@ -255,7 +265,6 @@ func (s *Server) dispatch() {
 			close(s.addClient)
 			close(s.removeClient)
 			close(s.closeChannel)
-			close(s.shutdown)
 
 			s.options.Logger.Print("server stopped.")
 			return
