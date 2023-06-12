@@ -15,7 +15,7 @@ type Server struct {
 	channels     map[string]*Channel
 	addClient    chan *Client
 	removeClient chan *Client
-	shutdown     chan bool
+	shutdown     chan struct{}
 	closeChannel chan string
 }
 
@@ -37,7 +37,7 @@ func NewServer(options *Options) *Server {
 		make(map[string]*Channel),
 		make(chan *Client),
 		make(chan *Client),
-		make(chan bool),
+		make(chan struct{}),
 		make(chan string),
 	}
 
